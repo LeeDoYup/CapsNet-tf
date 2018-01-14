@@ -49,6 +49,18 @@ Test samples (original test images), Reconstruction by masking with y-label, and
 ![recon_result](./assets/recon_result.jpeg)
 
 
+- Tweak Instanitation Vectors 
+
+Tweak test samples are below. In a digit capsule (16-D), each neuron represents a instantiation parameters such as thinkness, inclination, and so on.
+
+![tweak_result1](./assets/tweak_result1.png)
+
+![tweak_result2](./assets/tweak_result2.png)
+
+![tweak_result3](./assets/tweak_result3.png)
+
+
+
 ## File Descriptions
 - main.py : Main function of implementations, contained argument parsers, model construction, and test.
 - model.py : CapsNet class
@@ -93,6 +105,7 @@ Also, you can adjust various hyper-parameters for learning. You can check FLAGS 
 After training model, you can uses the model for test its performance.
 
     $ python main.py --train=False --validation_check=(True or False)
+    $ python main.py --train=False --validation_check=(True or False) --reconstruction_test=True --tweak_test=True --tweak_num=5
 
 Then, 1) test performances printed, 2) reconstruction samples are saved in './samples', 3) tweak image results are save in './tweak'.
 
