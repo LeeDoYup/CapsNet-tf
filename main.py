@@ -12,13 +12,16 @@ flags = tf.app.flags
 
 #name, defulat value, description
 #below are for train and test
-flags.DEFINE_integer("epoch", 25, "Epoch to train [25]")
+flags.DEFINE_integer("epoch", 5, "Epoch to train [25]")
 flags.DEFINE_integer("test_epoch", 2000, "Epoch for latent mapping in anomaly detection to train [200]")
 flags.DEFINE_float("learning_rate", 0.001, "Learning rate of for adam [0.001]")
-flags.DEFINE_float("beta1", 0.9, "Momentum term of adam [0.9]")
 flags.DEFINE_boolean("train", True, "True for training, False for testing [False]")
-flags.DEFINE_boolean("validation_check", True, "Use validation set and early stopping")
+flags.DEFINE_boolean("validation_check", False, "Use validation set and early stopping")
 flags.DEFINE_boolean("visualize", False, "True for visualizing, False for nothing [False]")
+
+flags.DEFINE_boolean("reconstruction_test", False, "In test, make reconstruction images [False]")
+flags.DEFINE_boolean("tweak_test", False, "In test, make tweaked reconstruction images [False]")
+flags.DEFINE_integer("tweak_num", 5, "Number of sample in tweak test [5]")
 
 flags.DEFINE_integer("primary_dim", 8, "Dimensionality of Capsules in Primary Capsule Layer [8]")
 flags.DEFINE_integer("digit_dim", 16, "Dimensionality of Capsules in Digit Capsule Layer [16]")
@@ -40,7 +43,7 @@ flags.DEFINE_string("val_checkpoint_dir", "val_checkpoint", "Directory name to s
 flags.DEFINE_string("checkpoint_dir", "checkpoint", "Directory name to save the checkpoints [checkpoint]")
 flags.DEFINE_string("test_dir", "test_data", "Directory name to load the anomaly detstion result [test_data]")
 
-flags.DEFINE_boolean("crop", False, "True for training, False for testing [False]")
+#flags.DEFINE_boolean("crop", False, "True for training, False for testing [False]")
 
 FLAGS = flags.FLAGS
 
@@ -74,7 +77,10 @@ def main(_):
       if not CapsuleNet.load(checkpoint_dir):
         raise Exception("[!] Train a model first, then run test mode")
       CapsuleNet.test_check()
-      CapsuleNet.test_reconstruction()
+      if FLAGS.reconstruction_test == True:
+        CapsuleNet.test_reconstruction()
+      if FLAGS.tweak_test == True:
+        CapsuleNet.test_tweak(FLAGS.tweak_num)
 
 if __name__ == '__main__':
   tf.app.run()

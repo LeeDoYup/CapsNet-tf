@@ -6,6 +6,7 @@ from glob import glob
 import tensorflow as tf
 import numpy as np
 from six.moves import xrange
+import matplotlib.pyplot as plt
 
 from ops import *
 from utils import *
@@ -151,12 +152,21 @@ class Capsule(object):
 
   def validation_check(self, counter):
     assert self.config.validation_check == True
-    feed_dict = {self.input_x: self.x_valid, self.input_y: self.y_valid}
-    validation_loss, validation_accuracy= self.sess.run([self.loss, self.acc], feed_dict = feed_dict)
-    print("Epoch: [%2d], validation_loss = %.8f, validation_accuracy: %.8f"\
-      %(epoch, validation_loss, validation_accuracy))
+    val_num = int(len(self.x_valid)/self.batch_size)
+    val_loss, val_accuracy = 0.0, 0.0
+    for idx in range(val_num-1):
+      feed_dict = {self.input_x: self.x_valid[idx*self.batch_size: (idx+1)*self.batch_size], self.input_y: self.y_valid[idx*self.batch_size: (idx+1)*self.batch_size]}
+      loss, accuracy = self.sess.run([self.loss, self.acc], feed_dict=feed_dict)
+      val_loss += loss
+      val_accuracy += accuracy
+    
+    val_loss /=(val_num-1)
+    val_accuracy /= (val_num-1)
+    print("[*] Validation: loss = %.8f, accuracy: %.8f"\
+      %(validation_loss, validation_accuracy))
+
     if validation_loss < self.min_val_loss:
-      print("Checkpoint is saved for Early Stopping (min validation loss)")
+      print("[*] Checkpoint is saved for Early Stopping (min validation loss)")
       self.save(self.val_checkpoint_dir, counter)
 
   def test_check(self):
@@ -168,8 +178,8 @@ class Capsule(object):
       loss, accuracy = self.sess.run([self.loss, self.acc], feed_dict = feed_dict)
       test_loss+=loss
       test_accuracy+=accuracy
-    test_loss /= test_num
-    test_accuracy /= test_num
+    test_loss /= (test_num-1)
+    test_accuracy /= (test_num-1)
     print("[*] Final Results.. Test Loss: %.8f, Test Accuracy: %.8f" %(test_loss, test_accuracy))
 
   def test_reconstruction(self):
@@ -194,6 +204,48 @@ class Capsule(object):
     recon_images = self.sess.run(self.recon, feed_dict=feed_dict)
     recon_images = np.reshape(recon_images, [-1]+list(self.sample_x[0].shape))
     save_images(recon_images, [sample_frame_dim , sample_frame_dim], './samples/recon_samples_with_label_arrange.png')
+
+  def test_tweak(self, tweak_sample=5, line_space=11):
+    
+    #tweak_range = np.linespace(-0.25, 0.25, line_space) #shape = [11]
+
+    num_test = len(self.x_test)
+    sample_idx = list(np.random.choice(num_test, tweak_sample))
+    tweak_x, tweak_y = self.x_test[sample_idx], self.y_test[sample_idx]
+
+    tweak_y = np.tile(tweak_y, [line_space*self.digit_dim,1]) # [11, 10], 
+    
+
+    feed_dict = {self.input_x: tweak_x} 
+    sample_digit_caps = self.sess.run(self.digit_caps, feed_dict=feed_dict)
+
+    steps = np.linspace(-0.25, 0.25, line_space)
+    pose_paras = np.arange(self.digit_dim)
+
+    tweaks = np.zeros([self.digit_dim, line_space, 1,1, self.digit_dim])
+    tweaks[pose_paras, :, 0, 0, pose_paras] = steps
+    sample_digit_caps = sample_digit_caps[np.newaxis, np.newaxis]
+
+    tweaked_vectors = tweaks + sample_digit_caps #shape = [16, 11, batch_size, 10, 16]
+    tweaked_vectors = np.reshape(tweaked_vectors, [-1, self.n_digit, self.digit_dim])
+
+    print np.shape(tweaked_vectors)
+
+    tweaked_recon = self.sess.run(self.recon, feed_dict={self.digit_caps: tweaked_vectors, self.input_y: tweak_y, self.recon_with_label:False})
+    tweaked_recon = np.reshape(tweaked_recon, [self.digit_dim, line_space, tweak_sample]+list(self.x_test[0].shape))
+
+    if not os.path.isdir('./tweak_result'): os.mkdir('./tweak_result')
+    for dim in range(self.digit_dim):
+      plt.figure()
+      for row in range(tweak_sample):
+        for col in range(line_space):
+          print np.shape(tweaked_recon[0,0,0])
+          plt.subplot(tweak_sample, line_space, row * line_space + col + 1)
+          cmap = 'binary' if np.shape(tweaked_recon)[-1] ==1 else None
+          plt.imshow(np.squeeze(tweaked_recon[dim, col, row]), cmap=cmap)
+          plt.axis('off')
+      plt.savefig('./tweak_result/tweak_result_'+str(dim)+'.png')
+
 
   def load_mnist(self, valid=False):
     data_dir = os.path.join("./data", self.dataset_name)
@@ -274,7 +326,7 @@ class Capsule(object):
   def load(self, checkpoint_dir):
     import re
     print(" [*] Reading checkpoints...")
-    if self.validation_check:
+    if self.config.validation_check:
       print("[*] Reading optimal validation checkpoints...")
 
     checkpoint_dir = os.path.join(checkpoint_dir, self.model_dir)
