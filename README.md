@@ -116,6 +116,5 @@ Then, 1) test performances printed, 2) reconstruction samples are saved in './sa
 - All representations of the tensor shape are parameterized for model generalization.
 
 ## To Do
-- [ ] Tweak Instantiation vectors in digit caps
 - [ ] Test with affMNIST dataset
 - [ ] Test with Multi-MNIST test, overlapped characters.
