@@ -20,7 +20,7 @@ In this implementation, CapsNet has 3 hidden layers: 1) original conv (256), 2) 
 - 2) Primary Capsules: 32 number of 8D capsules, 9x9 and strides=2 conv filters 
 - 3) Digit Capsules: 10 number of 16D capsules. *learnt by "Dynamic Routing"
 
-![Model Structure](./assets/CapsNet\ Architecture.png)
+![Model Structure](./assets/CapsNet_Architecture.png)
 
 ## Implementation Graph (Tensorboard)
 
