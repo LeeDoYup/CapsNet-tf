@@ -1,107 +1,98 @@
-# AnoGAN in tensorflow
+# Capsule Networks (CapsNet) in tensorflow
 
-Tensorflow implementation of [Anomaly GAN (AnoGAN)](https://arxiv.org/abs/1703.05921).
+Tensorflow implementation of [Dynamic Routing Betwwen Capsules](https://arxiv.org/abs/1710.09829) (Capsule Networks, CapsNet).
 
-This model detect anomaly part in images, after training DCGAN with normal dataset.
+Capsule is a vector that represents features with instantiation vector and its norm means the existence probability of the feature.
 
-Basic model is DCGAN (Deep Convolutional Generative Adversarial Networks).
+That is, features are not represented by single neurons, but capsule vectors.
 
-* (Anomaly Detection of MNIST is not yet available)
+It seems to overcome the limitations of max-pooing.
+
+That is, capsules assure positional "equivalence", not "invariance", and considers spatial relationship between features.
+
+Each capsule is learnt by "dynamic rounting", means "agreement" between low-level capsules.
+
 
 ## Model Description
-After learn DCGAN model with normal dataset (not contains anomalies), 
+In this implementation, CapsNet has 3 hidden layers: 1) original conv (256), 2) Primary Capsules, 3) Digit Capsules.
 
-* Anomaly Detector calculates anomaly score of unseen images.
+- 1) Original Conv: 256 filters (9x9), strides=1, Valid padding, ReLU
+- 2) Primary Capsules: 32 number of 8D capsules, 9x9 and strides=2 conv filters 
+- 3) Digit Capsules: 10 number of 16D capsules. *learnt by "Dynamic Routing"
 
+![Model Structure](./assets/CapsNet_Architecture.png)
 
-![Model Structure](./assets/model_structure.jpeg)
+## Implementation Graph (Tensorboard)
 
+![Graph](./assets/capsnet_graph.png)
 
-When unseen data comes, the model tries to find latent variable z that generates input image using backpropagation. (similar with style transfer)
+## Results
 
-Anomaly Score is based on residual and discrimination losses.
-- Residual loss: L1 distance between generated image by z and unseen test image.
-- Discrimination loss: L1 distacne between hidden representations of generated and test image, extracted by discriminators.
+### MNIST classification (without augmentation)
 
-![Res_Loss](./assets/res_loss.jpeg)
+- Accuracy
 
+After 10 epochs with 64 batch_size, test accuracy was about 0.975 %.
+![mnist_accuracy_without_aug](./assets/mnist_test_result.jpeg)
 
-![Discrimination Loss](./assets/dis_loss.jpeg)
+- Losses
+![mnist_loss_sum_without_aug](./assets/mnist_loss_summary.png)
 
-Total Loss for finding latent variable z is weighted sum of the two. (defualt lambda = 0.1)
-
-
-![Total Loss](./assets/t_loss.jpeg)
 
 ## File Descriptions
 - main.py : Main function of implementations, contained argument parsers, model construction, and test.
-- model.py : DCGAN class (containing anomaly detection function. Imple core)
-- download.py : Files for downloading celebA, LSUN, and MNIST. 
-- ops.py : Some operation functions with tensorflow.
+- model.py : CapsNet class
+- download.py : Files for downloading MNIST. 
+- ops.py : Some operation functions with tensorflow. *ConvCaps Layer implementation included*
 - utils.py : Some functions dealing with image preprocessing.
 
 
 ## Prerequisites (my environments)
-
 - Python 2.7
 - Tensorflow > 0.14
-- SciPy
-- pillow
-- (Optional) [Align&Cropped Images.zip](http://mmlab.ie.cuhk.edu.hk/projects/CelebA.html) : Large-scale CelebFaces Dataset
+If other libraries are needed, all libraries are available on pip install --upgrade "library_name"
+
 
 
 ## Usage
 
-First, you "must" have trained DCGAN model with normal dataset.
+### Download dataset
 
-If you have checkpoint file, the model tries to use it.
+First, you have to download MNIST dataset.
 
-### Model Preparation 
-(If you want to download and train the model)
-First, download dataset with:
+    $ python download.py mnist
 
-    $ python download.py mnist celebA
+If you want to uses other dataset, make image_load function and loaded them on self.x_data, self.y_data, self.x_test, self.y_test.
+
+
+### Train CapsNet Model
 
 To train a model with downloaded dataset:
 
-    $ python main.py --dataset mnist --input_height=28 --output_height=28 --train
-    $ python main.py --dataset celebA --input_height=108 --train --crop
+    $ python main.py --epoch=10 --validation_check=False
 
-Or, you can use your own dataset (without central crop) by:
+If you (want to) have validation dataset and save models with lowest validation loss,
 
-    $ mkdir data/DATASET_NAME
-    ... add images to data/DATASET_NAME ...
-    $ python main.py --dataset DATASET_NAME --train
-    $ python main.py --dataset DATASET_NAME
-    $ # example
-    $ python main.py --dataset=eyes --input_fname_pattern="*_cropped.png" --train
+    $ python main.py --epoch=10 --validation_check=True
 
-### Anomaly Detection
-After having trained DCGAN model, you have to prepare test images for anomaly detection.
+Also, you can adjust various hyper-parameters for learning. You can check FLAGS in "main.py"
 
-    $ mkdir ./test_data
-    ... add test images to ./test_data ...
-    
-    $ python main.py --dataset DATASET_NAME --input_height=108 --crop --anomaly_test
 
-## Results
-To valid the model implementation, simple test was proceeded.
+### Test Trained Model
 
-Initial generated image by DCGAN in training is conisdered as anomaly.
+After training model, you can uses the model for test its performance.
 
-After learns DCGAN model, compared final and initial images on certain latent varaible z.
+    $ python main.py --train=False --validation_check=(True or False)
 
-Then, anomaly score of initial images was calculated.
+Then, 1) test performances printed, 2) reconstruction samples are saved in './samples', 3) tweak image results are save in './tweak'.
 
-Eyes, mouth, and distorted parts in image were detected.
 
-![result](./assets/result_example.jpeg)
+## For Understanding
 
-## Related works
-- [Image Style Transfer](https://pdfs.semanticscholar.org/7568/d13a82f7afa4be79f09c295940e48ec6db89.pdf)
-- (Reconstruction-based AD) [Anomaly Detection in DBMSs](https://arxiv.org/abs/1708.02635)
-- (ICLR2018 under-review) [ADGAN](https://openreview.net/forum?id=S1EfylZ0Z)
+- Many variables were tiled for parallel computing of tf.matmul by GPU.
+- All representations of the tensor shape are parameterized for model generalization.
 
-## Acknowledgement
-- Thanks for @carpedm20 's implementation of [DCGAN](https://github.com/carpedm20/DCGAN-tensorflow). I implemented AnoGAN based on his implementation.
-
+## To Do
+- [ ] Tweak Instantiation vectors in digit caps
+- [ ] Test with affMNIST dataset
+- [ ] Test with Multi-MNIST test, overlapped characters.
