@@ -97,11 +97,9 @@ class Capsule(object):
 
     recon_mask = tf.one_hot(mask_target, depth=self.n_digit, name='mask_output') #shape = [batch_size, 10]
     recon_mask = tf.reshape(recon_mask, [-1, self.n_digit, 1], name='reshape_mask_output') # shape [batch_size, 10 ,1]
-    print recon_mask
-    print self.digit_caps
+
 
     recon_mask = tf.multiply(self.digit_caps, recon_mask, name='mask_result')
-    print recon_mask
     recon_mask = tf.layers.flatten(recon_mask, name='mask_input')
 
     with tf.variable_scope(name) as scope:
@@ -213,7 +211,7 @@ class Capsule(object):
     sample_idx = list(np.random.choice(num_test, tweak_sample))
     tweak_x, tweak_y = self.x_test[sample_idx], self.y_test[sample_idx]
 
-    tweak_y = np.tile(tweak_y, [line_space*self.digit_dim,1]) # [11, 10], 
+    tweak_y = np.tile(tweak_y, [line_space*self.digit_dim,1]) # [5*11, 10], 
     
 
     feed_dict = {self.input_x: tweak_x} 
@@ -227,9 +225,7 @@ class Capsule(object):
     sample_digit_caps = sample_digit_caps[np.newaxis, np.newaxis]
 
     tweaked_vectors = tweaks + sample_digit_caps #shape = [16, 11, batch_size, 10, 16]
-    tweaked_vectors = np.reshape(tweaked_vectors, [-1, self.n_digit, self.digit_dim])
-
-    print np.shape(tweaked_vectors)
+    tweaked_vectors = np.reshape(tweaked_vectors, [-1, self.n_digit, self.digit_dim]) #[16*11*batch_size, 10, 16]
 
     tweaked_recon = self.sess.run(self.recon, feed_dict={self.digit_caps: tweaked_vectors, self.input_y: tweak_y, self.recon_with_label:False})
     tweaked_recon = np.reshape(tweaked_recon, [self.digit_dim, line_space, tweak_sample]+list(self.x_test[0].shape))
@@ -239,7 +235,6 @@ class Capsule(object):
       plt.figure()
       for row in range(tweak_sample):
         for col in range(line_space):
-          print np.shape(tweaked_recon[0,0,0])
           plt.subplot(tweak_sample, line_space, row * line_space + col + 1)
           cmap = 'binary' if np.shape(tweaked_recon)[-1] ==1 else None
           plt.imshow(np.squeeze(tweaked_recon[dim, col, row]), cmap=cmap)
