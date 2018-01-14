@@ -53,11 +53,11 @@ Test samples (original test images), Reconstruction by masking with y-label, and
 
 Tweak test samples are below. In a digit capsule (16-D), each neuron represents a instantiation parameters such as thinkness, inclination, and so on.
 
-![tweak_result1](./assets/tweak_result1.png)
+![tweak_result1](./assets/tweak_result_1.png)
 
-![tweak_result2](./assets/tweak_result2.png)
+![tweak_result2](./assets/tweak_result_2.png)
 
-![tweak_result3](./assets/tweak_result3.png)
+![tweak_result3](./assets/tweak_result_3.png)
 
 
 
