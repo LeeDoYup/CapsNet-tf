@@ -73,7 +73,7 @@ def main(_):
       checkpoint_dir = FLAGS.val_checkpoint_dir if FLAGS.validation_check else FLAGS.checkpoint_dir
       if not CapsuleNet.load(checkpoint_dir):
         raise Exception("[!] Train a model first, then run test mode")
-      #CapsuleNet.test_check()
+      CapsuleNet.test_check()
       CapsuleNet.test_reconstruction()
 
 if __name__ == '__main__':
