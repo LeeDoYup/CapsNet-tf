@@ -43,14 +43,10 @@ After 10 epochs with 64 batch_size, test accuracy was about 0.975 %.
 
 - Reconstruction
 
-Test samples (original test images)
-![original_samples](./assets/samples_arrange.png)
+Test samples (original test images), Reconstruction by masking with y-label, and Reconstruction by masking without y-label.
 
-Reconstruction by masking with y-label
-![recon_samples_with](./assets/recon_samples_with_label_arrange.png)
 
-Reconstruction by masking without y-label
-![recon_samples_without](./assets/recon_samples_without_label_arrange.png)
+![recon_result](./assets/recon_result.jpeg)
 
 
 ## File Descriptions
