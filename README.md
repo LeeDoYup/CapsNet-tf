@@ -35,8 +35,22 @@ In this implementation, CapsNet has 3 hidden layers: 1) original conv (256), 2) 
 After 10 epochs with 64 batch_size, test accuracy was about 0.975 %.
 ![mnist_accuracy_without_aug](./assets/mnist_test_result.jpeg)
 
+
 - Losses
+
 ![mnist_loss_sum_without_aug](./assets/mnist_loss_summary.png)
+
+
+- Reconstruction
+
+Test samples (original test images)
+![original_samples](./assets/samples_arrange.png)
+
+Reconstruction by masking with y-label
+![recon_samples_with](./assets/recon_samples_with_label_arrange.png)
+
+Reconstruction by masking without y-label
+![recon_samples_without](./assets/recon_samples_without_label_arrange.png)
 
 
 ## File Descriptions
