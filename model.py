@@ -129,7 +129,10 @@ class Capsule(object):
       np.random.shuffle(self.y_data)
       for idx in range(batch_num):
         start_time = time.time()
-        batch_x = self.x_data[idx*config.batch_size: (idx+1)*config.batch_size]
+        if not self.config.data_deformation:
+          batch_x = self.x_data[idx*config.batch_size: (idx+1)*config.batch_size]
+        else:
+          batch_x = batch_deformation(self.x_data[idx*config.batch_size: (idx+1)*config.batch_size])
         batch_y = self.y_data[idx*config.batch_size: (idx+1)*config.batch_size]
 
         feed_dict = {self.input_x: batch_x, self.input_y: batch_y}
@@ -221,8 +224,8 @@ class Capsule(object):
     pose_paras = np.arange(self.digit_dim)
 
     tweaks = np.zeros([self.digit_dim, line_space, 1,1, self.digit_dim])
-    tweaks[pose_paras, :, 0, 0, pose_paras] = steps
-    sample_digit_caps = sample_digit_caps[np.newaxis, np.newaxis]
+    tweaks[pose_paras, :, 0, 0, pose_paras] = steps #[16, 11, 1, 1, 16]
+    sample_digit_caps = sample_digit_caps[np.newaxis, np.newaxis] #[16, 11, batch_size, 10, 16]
 
     tweaked_vectors = tweaks + sample_digit_caps #shape = [16, 11, batch_size, 10, 16]
     tweaked_vectors = np.reshape(tweaked_vectors, [-1, self.n_digit, self.digit_dim]) #[16*11*batch_size, 10, 16]

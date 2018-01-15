@@ -17,7 +17,7 @@ flags.DEFINE_integer("test_epoch", 2000, "Epoch for latent mapping in anomaly de
 flags.DEFINE_float("learning_rate", 0.001, "Learning rate of for adam [0.001]")
 flags.DEFINE_boolean("train", True, "True for training, False for testing [False]")
 flags.DEFINE_boolean("validation_check", False, "Use validation set and early stopping")
-flags.DEFINE_boolean("visualize", False, "True for visualizing, False for nothing [False]")
+flags.DEFINE_boolean("data_deformation", False, "Deformation of Training Data. Shift upto 2 pixels. [False]")
 
 flags.DEFINE_boolean("reconstruction_test", False, "In test, make reconstruction images [False]")
 flags.DEFINE_boolean("tweak_test", False, "In test, make tweaked reconstruction images [False]")

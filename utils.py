@@ -17,6 +17,17 @@ def show_all_variables():
 
 
 # Initialize variables that are not initialized yet
+def batch_deformation(batch_images, max_shift = 2):
+  batch_size, h, w, c = batch_images.shape #(batch_size, 28, 28, 1)
+  deform_batch = np.zeros([batch_size, h+2*max_shift, w+2*max_shift, c])
+  for idx in range(batch_size):
+    off_set = np.random.randint(0, 2*max_shift + 1, 2)
+    deform_batch[idx, off_set[0]:off_set[0]+h, off_set[1]:off_set[1]+w, :] = batch_images[idx]
+
+  return deform_batch[:,max_shift:max_shift+h, max_shift: max_shift+w, :] 
+
+
+
 def initialize_uninitialized(sess):
   global_vars = tf.global_variables()
   is_not_initialized = sess.run([tf.is_variable_initialized(var) for var in global_vars])
