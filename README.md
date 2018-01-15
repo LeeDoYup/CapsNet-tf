@@ -60,6 +60,13 @@ Tweak test samples are below. In a digit capsule (16-D), each neuron represents 
 ![tweak_result3](./assets/tweak_result_3.png)
 
 
+- multi MNIST classification and reconstruction
+
+Now, codes are completed and model is training. Below figure is sample result with small number of training.
+
+![multi_result](./assets/multi_MNIST_sample.jpeg)
+
+
 
 ## File Descriptions
 - main.py : Main function of implementations, contained argument parsers, model construction, and test.
@@ -114,7 +121,3 @@ Then, 1) test performances printed, 2) reconstruction samples are saved in './sa
 
 - Many variables were tiled for parallel computing of tf.matmul by GPU.
 - All representations of the tensor shape are parameterized for model generalization.
-
-## To Do
-- [ ] Test with affMNIST dataset
-- [ ] Test with Multi-MNIST test, overlapped characters.
