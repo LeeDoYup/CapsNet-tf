@@ -67,7 +67,7 @@ Tweak test samples are below. In a digit capsule (16-D), each neuron represents 
 
 Now, codes are completed and model is training. Below figure is sample result with small number of training.
 
-![multi_result](./assets/multi_MNIST_sample.jpeg)
+![multi_result](./assets/multi_MNIST_sample2.jpeg)
 
 
 
