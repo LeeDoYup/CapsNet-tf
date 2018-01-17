@@ -36,7 +36,7 @@ After 10 epochs with 64 batch_size, test accuracy was about 0.975 %.
 ![mnist_accuracy_without_aug](./assets/mnist_test_result.jpeg)
 
 With data deformation in training, test accuracy was about 0.988 %
-![mnist_accuracy_with_aug](./assets/result_deform.jpeg)
+![mnist_accuracy_with_aug](./assets/test_deform.jpeg)
 
 
 ### Losses
