@@ -15,10 +15,12 @@ flags = tf.app.flags
 flags.DEFINE_integer("epoch", 5, "Epoch to train [25]")
 flags.DEFINE_integer("test_epoch", 2000, "Epoch for latent mapping in anomaly detection to train [200]")
 flags.DEFINE_float("learning_rate", 0.001, "Learning rate of for adam [0.001]")
-flags.DEFINE_boolean("train", True, "True for training, False for testing [False]")
 flags.DEFINE_boolean("validation_check", False, "Use validation set and early stopping")
 flags.DEFINE_boolean("data_deformation", False, "Deformation of Training Data. Shift upto 2 pixels. [False]")
+flags.DEFINE_boolean("multi_MNIST", False, "Train capsule net with multi_MNIST dataste [False]")
 
+flags.DEFINE_boolean("train", False, "True for training, False for testing [False]")
+flags.DEFINE_boolean("test", False, "True for training, False for testing [False]")
 flags.DEFINE_boolean("reconstruction_test", False, "In test, make reconstruction images [False]")
 flags.DEFINE_boolean("tweak_test", False, "In test, make tweaked reconstruction images [False]")
 flags.DEFINE_integer("tweak_num", 5, "Number of sample in tweak test [5]")
@@ -41,6 +43,7 @@ flags.DEFINE_string("input_fname_pattern", "*.jpg", "Glob pattern of filename of
 flags.DEFINE_string("val_checkpoint_dir", "val_checkpoint", "Directory name to save the checkpoints of early stop [val_checkpoint]")
 
 flags.DEFINE_string("checkpoint_dir", "checkpoint", "Directory name to save the checkpoints [checkpoint]")
+flags.DEFINE_string("multi_checkpoint_dir", "multi_checkpoint", "Directory name to save the checkpoints of Multi-MNIST [multi_checkpoint]")
 flags.DEFINE_string("test_dir", "test_data", "Directory name to load the anomaly detstion result [test_data]")
 
 #flags.DEFINE_boolean("crop", False, "True for training, False for testing [False]")
@@ -53,8 +56,11 @@ def main(_):
   if FLAGS.input_width is None:
     FLAGS.input_width = FLAGS.input_height
 
-  if not os.path.exists(FLAGS.checkpoint_dir):
+  if FLAGS.multi_MNIST == False and os.path.exists(FLAGS.checkpoint_dir)== False:
     os.makedirs(FLAGS.checkpoint_dir)
+  elif FLAGS.multi_MNIST == True and os.path.exists(FLAGS.multi_checkpoint_dir)== False:
+    os.makedirs(FLAGS.multi_checkpoint_dir)
+
   if FLAGS.validation_check == True and not os.path.exists(FLAGS.val_checkpoint_dir):
     os.makedirs(FLAGS.val_checkpoint_dir)
 
@@ -66,14 +72,18 @@ def main(_):
 
   with tf.Session(config=run_config) as sess:
     if FLAGS.dataset == 'mnist':
-      CapsuleNet = Capsule(sess, FLAGS)
+      CapsuleNet = Capsule(sess, FLAGS, input_height=FLAGS.input_height, batch_size = FLAGS.batch_size)
 
     show_all_variables()
 
     if FLAGS.train:
       CapsuleNet.train()
-    else:
-      checkpoint_dir = FLAGS.val_checkpoint_dir if FLAGS.validation_check else FLAGS.checkpoint_dir
+    if FLAGS.test:
+      if not FLAGS.multi_MNIST:
+        checkpoint_dir = FLAGS.val_checkpoint_dir if FLAGS.validation_check else FLAGS.checkpoint_dir
+      else:
+        checkpoint_dir = FLAGS.multi_checkpoint_dir
+
       if not CapsuleNet.load(checkpoint_dir):
         raise Exception("[!] Train a model first, then run test mode")
       CapsuleNet.test_check()
@@ -81,6 +91,8 @@ def main(_):
         CapsuleNet.test_reconstruction()
       if FLAGS.tweak_test == True:
         CapsuleNet.test_tweak(FLAGS.tweak_num)
+      if FLAGS.multi_MNIST == True:
+        CapsuleNet.test_multi_MNIST()
 
 if __name__ == '__main__':
   tf.app.run()

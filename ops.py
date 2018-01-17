@@ -45,6 +45,7 @@ def reconstruction_loss(input_, recon):
 
   return tf.reduce_mean(tf.reduce_sum(tf.square(input_ - recon), axis=-1))
 
+
 def conv2d(input_, output_dim, kernel_h=9, kernel_w=None, stride_h=2, stride_w=None, padding='VALID', reuse=False, initializer=tf.truncated_normal_initializer(stddev=0.02), name="conv2d"):
   
   if kernel_w == None: kernel_w = kernel_h

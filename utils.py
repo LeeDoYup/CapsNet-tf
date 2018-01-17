@@ -15,17 +15,27 @@ def show_all_variables():
   model_vars = tf.trainable_variables()
   slim.model_analyzer.analyze_vars(model_vars, print_info=True) 
 
-
 # Initialize variables that are not initialized yet
-def batch_deformation(batch_images, max_shift = 2):
+def batch_deformation(batch_images, max_shift = 2, keep_dim= True):
   batch_size, h, w, c = batch_images.shape #(batch_size, 28, 28, 1)
   deform_batch = np.zeros([batch_size, h+2*max_shift, w+2*max_shift, c])
   for idx in range(batch_size):
     off_set = np.random.randint(0, 2*max_shift + 1, 2)
     deform_batch[idx, off_set[0]:off_set[0]+h, off_set[1]:off_set[1]+w, :] = batch_images[idx]
 
-  return deform_batch[:,max_shift:max_shift+h, max_shift: max_shift+w, :] 
+  if keep_dim:
+    return deform_batch[:,max_shift:max_shift+h, max_shift: max_shift+w, :] 
+  else:
+    return deform_batch
 
+def multi_batch(batch_x1, batch_y1, batch_x2, batch_y2):
+  batch_x1 = batch_deformation(batch_x1, max_shift=4, keep_dim=False)
+  batch_x2 = batch_deformation(batch_x2, max_shift=4, keep_dim=False)
+  batch_x = (batch_x1 + batch_x2)
+
+  batch_y = np.clip(batch_y1+batch_y2, 0, 1)
+
+  return batch_x, batch_y
 
 
 def initialize_uninitialized(sess):
