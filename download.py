@@ -1,5 +1,5 @@
 '''
-Downloads: Celeb-A, LSUN, or MNIST dataset
+This implementation is from github.com/carpedm20/DCGAN-tensorflow
 '''
 
 from __future__ import print_function
