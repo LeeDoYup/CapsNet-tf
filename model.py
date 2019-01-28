@@ -246,14 +246,14 @@ class Capsule(object):
     if not os.path.isdir('./samples'): os.mkdir('./samples')
     save_images(self.sample_x, [sample_frame_dim, sample_frame_dim], './samples/samples_arrange.png')
 
-    print "[*] Reconstruction images of samples are saved without labels"
+    print("[*] Reconstruction images of samples are saved without labels")
     feed_dict = {self.input_x: self.sample_x, self.input_y: self.sample_y, self.recon_with_label: False}
     recon_images = self.sess.run(self.recon, feed_dict=feed_dict)
 
     recon_images = np.reshape(recon_images, [-1]+list(self.sample_x[0].shape))
     save_images(recon_images, [sample_frame_dim , sample_frame_dim], './samples/recon_samples_without_label_arrange.png')
 
-    print "[*] Reconstruction images of samples are saved with labels"
+    print("[*] Reconstruction images of samples are saved with labels")
     feed_dict = {self.input_x: self.sample_x, self.input_y: self.sample_y, self.recon_with_label: True}
     recon_images = self.sess.run(self.recon, feed_dict=feed_dict)
     recon_images = np.reshape(recon_images, [-1]+list(self.sample_x[0].shape))
@@ -338,7 +338,7 @@ class Capsule(object):
         plt.subplot(4, multi_sample, idx+0*multi_sample+1)
         plt.imshow(test_batch_x[idx,:,:,0], cmap='gist_gray')
         #plt.imshow(test_batch_x[idx,:,:,0],cmap='gist_gray')
-	plt.axis('off')
+        plt.axis('off')
 
         plt.subplot(4, multi_sample, idx+1*multi_sample+1)
         plt.imshow(overlap_result[idx],cmap=cmap)
