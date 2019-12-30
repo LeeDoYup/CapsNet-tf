@@ -81,7 +81,7 @@ Now, codes are completed and model is training. Below figure is sample result wi
 
 # Prerequisites (my environments)
 - Python 2.7
-- Tensorflow > 0.14
+- Tensorflow > 1.14
 If other libraries are needed, all libraries are available on pip install --upgrade "library_name"
 
 
